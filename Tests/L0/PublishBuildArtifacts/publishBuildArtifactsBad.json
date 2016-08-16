@@ -6,7 +6,7 @@
         "robocopy /E /NP /R:3 /bin/release \\\\UNCShare\\drop\\ *": {
             "stdout": "test stdout from robocopy",
             "stderr": "",
-            "code": 7
+            "code": 8
         }
     }
 }
