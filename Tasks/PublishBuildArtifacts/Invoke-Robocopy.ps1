@@ -31,9 +31,20 @@ $writer = New-Object System.IO.StreamWriter($stdout, $utf8)
 # Print the ##command.
 "##[command]robocopy.exe /E /COPY:DAT /XA:H /NP /R:3 `"$Source`" `"$Target`" *"
 
-# Robocopy writes output using the default console-output code page. Powershell
+# Robocopy writes output using the default console-output code page. PowerShell
 # by default expects external commands to use the default console-output code page.
-& robocopy.exe /E /COPY:DAT /XA:H /NP /R:3 $Source $Target *
+#
+# The output from robocopy needs to be iterated over. Otherwise PowerShell.exe
+# will launch the external command in such a way that it inherits the streams.
+& robocopy.exe /E /COPY:DAT /XA:H /NP /R:3 $Source $Target * 2>&1 |
+    ForEach-Object {
+        if ($_ -is [System.Management.Automation.ErrorRecord]) {
+            $_.Exception.Message
+        }
+        else {
+            $_
+        }
+    }
 "##[debug]exit code '$LASTEXITCODE'"
 if ($LASTEXITCODE -ge 8) {
     exit $LASTEXITCODE
