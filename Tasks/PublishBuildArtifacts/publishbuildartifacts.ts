@@ -3,7 +3,7 @@
 
 import os = require('os');
 import path = require('path');
-import process = require('process');
+var process = require('process');
 import tl = require('vsts-task-lib/task');
 import tr = require('vsts-task-lib/toolrunner');
 
