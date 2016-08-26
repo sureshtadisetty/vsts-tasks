@@ -9,14 +9,14 @@ param(
 # This script translates the output from robocopy into UTF8. Node has limited
 # built-in support for encodings.
 #
-# Robocopy uses the system default code page (CP_ACP). This system default code
+# Robocopy uses the system default code page (CP_ACP). The system default code
 # page varies depending on the locale configuration. On an en-US box, the system
 # default code page is Windows-1252.
 #
-# Note, on an en-US box, testing with the 'ç' character is a good way to determine
-# whether data is passed correctly between processes. This is because the
-# 'ç' character has a different code point across each of the common encodings
-# on an en-US box, i.e.
+# Note, on a typical en-US box, testing with the 'ç' character is a good way to
+# determine whether data is passed correctly between processes. This is because
+# the 'ç' character has a different code point across each of the common encodings
+# on a typical en-US box, i.e.
 #   1) the default console-output code page (IBM437)
 #   2) the system default code page (i.e. CP_ACP) (Windows-1252)
 #   3) UTF8
@@ -32,7 +32,8 @@ $writer = New-Object System.IO.StreamWriter($stdout, $utf8)
 # Print the ##command.
 "##[command]robocopy.exe /E /COPY:DAT /XA:H /NP /R:3 `"$Source`" `"$Target`" *"
 
-# PowerShell by default expects external commands to use the system default code page.
+# The $OutputEncoding variable (defaults to the system default code page) instructs
+# PowerShell how to interpret output from an external command.
 #
 # The output from robocopy needs to be iterated over. Otherwise PowerShell.exe
 # will launch the external command in such a way that it inherits the streams.
