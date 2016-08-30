@@ -9,9 +9,9 @@ param(
 # This script translates the output from robocopy into UTF8. Node has limited
 # built-in support for encodings.
 #
-# Robocopy uses the system default code page (CP_ACP). The system default code
-# page varies depending on the locale configuration. On an en-US box, the system
-# default code page is Windows-1252.
+# Robocopy uses the system default code page. The system default code page varies
+# depending on the locale configuration. On an en-US box, the system default code
+# page is Windows-1252.
 #
 # Note, on a typical en-US box, testing with the 'ç' character is a good way to
 # determine whether data is passed correctly between processes. This is because
@@ -29,24 +29,28 @@ $utf8 = New-Object System.Text.UTF8Encoding($false) # do not emit BOM
 $writer = New-Object System.IO.StreamWriter($stdout, $utf8)
 [System.Console]::SetOut($writer)
 
-# Print the ##command.
-"##[command]robocopy.exe /E /COPY:DAT /XA:H /NP /R:3 `"$Source`" `"$Target`" *"
+# All subsequent output must be written using [System.Console]::WriteLine(). In
+# PowerShell 4, Write-Host and Out-Default do not consider the updated stream writer.
 
-# The $OutputEncoding variable (defaults to the system default code page) instructs
-# PowerShell how to interpret output from an external command.
-#
+# Print the ##command.
+[System.Console]::WriteLine("##[command]robocopy.exe /E /COPY:DAT /XA:H /NP /R:3 `"$Source`" `"$Target`" *")
+
+# The $OutputEncoding variable instructs PowerShell how to interpret the output
+# from the external command.
+$OutputEncoding = [System.Text.Encoding]::Default
+
 # The output from robocopy needs to be iterated over. Otherwise PowerShell.exe
 # will launch the external command in such a way that it inherits the streams.
 & robocopy.exe /E /COPY:DAT /XA:H /NP /R:3 $Source $Target * 2>&1 |
     ForEach-Object {
         if ($_ -is [System.Management.Automation.ErrorRecord]) {
-            $_.Exception.Message
+            [System.Console]::WriteLine($_.Exception.Message)
         }
         else {
-            $_
+            [System.Console]::WriteLine($_)
         }
     }
-"##[debug]robocopy exit code '$LASTEXITCODE'"
+[System.Console]::WriteLine("##[debug]robocopy exit code '$LASTEXITCODE'")
 if ($LASTEXITCODE -ge 8) {
     exit $LASTEXITCODE
 }
